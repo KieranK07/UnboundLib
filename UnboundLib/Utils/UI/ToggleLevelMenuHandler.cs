@@ -98,9 +98,7 @@ namespace UnboundLib.Utils.UI
             mapMenuCanvas = Instantiate(mapsMenuCanvas);
             DontDestroyOnLoad(mapMenuCanvas);
 
-            var canvas = mapMenuCanvas.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = mainCamera;
+            MenuHandler.PlaceOnTop(mapMenuCanvas.GetComponent<Canvas>(), mainCamera);
             mapMenuCanvas.SetActive(false);
 
             // Set important root objects
@@ -605,9 +603,7 @@ namespace UnboundLib.Utils.UI
         {
             // Main camera changes when going back to menu and glow disappears if we don't se the camera again to the canvas
             Camera mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
-            Canvas canvas = mapMenuCanvas.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = mainCamera;
+            MenuHandler.PlaceOnTop(mapMenuCanvas.GetComponent<Canvas>(), mainCamera);
 
             //if (PhotonNetwork.IsConnected && !PhotonNetwork.IsMasterClient) return;
             mapMenuCanvas.SetActive(true);

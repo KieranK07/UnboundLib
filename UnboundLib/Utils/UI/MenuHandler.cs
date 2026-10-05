@@ -23,6 +23,52 @@ namespace UnboundLib.Utils.UI
 
         public static AssetBundle modOptionsUI;
 
+        // Marks a page made here inside the escape menu: Escape presses its Back button (Patches/EscapeMenuHandler.cs)
+        internal class PauseMenuPage : MonoBehaviour { }
+
+        // The toggle cards / toggle levels canvases draw on the main camera. Saved 100 units out, they sat level with
+        // the map, which showed through them in sandbox: they now sit closer than the game's UI canvas (5 units). They
+        // share the escape menu's sorting layer (MostFront) under its order 255, so opened from the escape menu they
+        // were drawn behind it: the escape menu is hidden while one is open (their order stays, so card art that
+        // sorts above the menu still does).
+        internal static void PlaceOnTop(Canvas canvas, Camera camera)
+        {
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = camera;
+            canvas.planeDistance = 4f;
+            if (!canvas.GetComponent<HidesEscapeMenu>()) canvas.gameObject.AddComponent<HidesEscapeMenu>();
+        }
+
+        internal class HidesEscapeMenu : MonoBehaviour
+        {
+            CanvasGroup group;
+            float alpha;
+            bool interactable, blocksRaycasts;
+
+            void OnEnable()
+            {
+                var menu = UIHandler.instance ? UIHandler.instance.transform.Find("Canvas/EscapeMenu") : null;
+                if (!menu) return;
+                group = menu.GetComponent<CanvasGroup>();
+                if (!group) group = menu.gameObject.AddComponent<CanvasGroup>();
+                alpha = group.alpha;
+                interactable = group.interactable;
+                blocksRaycasts = group.blocksRaycasts;
+                group.alpha = 0;
+                group.interactable = false;
+                group.blocksRaycasts = false;
+            }
+
+            void OnDisable()
+            {
+                if (!group) return;
+                group.alpha = alpha;
+                group.interactable = interactable;
+                group.blocksRaycasts = blocksRaycasts;
+                group = null;
+            }
+        }
+
         private MenuHandler()
         {
             // singleton first time setup
@@ -68,6 +114,7 @@ namespace UnboundLib.Utils.UI
                 GameObject.Destroy(obj.GetComponentInChildren<GoBack>(true));
                 obj.transform.Find("Group/Back").gameObject.GetComponent<Button>().onClick.RemoveAllListeners();
                 obj.transform.Find("Group/Back").gameObject.GetComponent<Button>().onClick.AddListener(() => ListMenu.instance.CloseTopPage());
+                obj.AddComponent<PauseMenuPage>();
             } else
             {
                 obj.GetComponentInChildren<GoBack>(true).target = goBackObject;

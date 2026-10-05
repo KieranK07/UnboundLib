@@ -62,9 +62,7 @@ namespace UnboundLib.Utils.UI
             cardMenuCanvas = Instantiate(cardMenu);
             DontDestroyOnLoad(cardMenuCanvas);
 
-            var canvas = cardMenuCanvas.GetComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = mainCamera;
+            MenuHandler.PlaceOnTop(cardMenuCanvas.GetComponent<Canvas>(), mainCamera);
             cardMenuCanvas.SetActive(false);
 
             scrollViewTrans = cardMenuCanvas.transform.Find("CardMenu/ScrollViews");
@@ -641,9 +639,7 @@ namespace UnboundLib.Utils.UI
             {
                 // Main camera changes when going back to menu and glow disappears if we don't se the camera again to the canvas
                 Camera mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>();
-                Canvas canvas = cardMenuCanvas.GetComponent<Canvas>();
-                canvas.renderMode = RenderMode.ScreenSpaceCamera;
-                canvas.worldCamera = mainCamera;
+                MenuHandler.PlaceOnTop(cardMenuCanvas.GetComponent<Canvas>(), mainCamera);
             }
 
             if (trans.gameObject != null) trans.gameObject.SetActive(active);

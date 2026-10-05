@@ -41,12 +41,20 @@ namespace UnboundLib.Patches
                 return false;
             }
             
+            // The old game left a submenu's own GoBack to handle Escape, so this skipped the escape menu unless "Main" was
+            // showing. Pause-menu pages made by MenuHandler have no GoBack any more (the 2025 GoBack doesn't go back while
+            // a keyboard player is in the game), so Escape did nothing in MODS and its submenus. Escape now presses the
+            // page's Back button: it closes the page and runs what leaving it needs (an old-UI mod menu unlocks input).
+            // Everything else is the game's: ToggleEsc closes its own pages and the escape menu.
             foreach (Transform child in __instance.transform)
             {
-                if (child.Find("Group") && child.Find("Group").gameObject.activeInHierarchy)
-                {
-                    return child.name == "Main";
-                }
+                if (!child.GetComponent<MenuHandler.PauseMenuPage>()) continue;
+                var group = child.Find("Group");
+                if (!group || !group.gameObject.activeInHierarchy) continue;
+                var back = group.Find("Back")?.GetComponent<UnityEngine.UI.Button>();
+                if (!back) continue;
+                back.onClick.Invoke();
+                return false;
             }
 
             return true;
