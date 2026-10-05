@@ -59,5 +59,20 @@ namespace UnboundLib.Patches
 
             return true;
         }
+
+        // Enter opens the game's console (in sandbox: the box to type a card name in). Opening the pause menu left it
+        // open on top of the menu and everything opened from it; it now closes, without sending what was typed.
+        [HarmonyPatch("ToggleEsc")]
+        [HarmonyPostfix]
+        private static void CloseConsole()
+        {
+            if (!EscapeMenuHandler.isEscMenu || !DevConsole.isTyping) return;
+            var console = Object.FindObjectOfType<DevConsole>();
+            if (!console || !console.inputField) return;
+            console.inputField.text = "";
+            console.inputField.gameObject.SetActive(false);
+            DevConsole.isTyping = false;
+            GameManager.lockInput = false;
+        }
     }
 }
