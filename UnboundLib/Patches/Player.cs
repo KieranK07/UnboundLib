@@ -114,6 +114,9 @@ namespace UnboundLib.Patches
         {
             foreach (CardInfo currentCard in __instance.data.currentCards)
             {
+                // A card in the list can already be destroyed when a rematch resets the players (seen online): GetComponent
+                // on it threw here, which stopped RoundsWithFriends' rematch and left the lobby stuck.
+                if (currentCard == null) continue;
                 if(currentCard.GetComponent<CustomCard>() is CustomCard customCard)
                 {
                     try
