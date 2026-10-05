@@ -83,11 +83,20 @@ namespace UnboundLib
 
         private const int VK_LSHIFT = 0xA0;
 
+        // "Hold Left Shift to skip loading UnboundLib". GetAsyncKeyState is Windows-only: on macOS the call threw
+        // DllNotFoundException and aborted this constructor, so none of UnboundLib's hooks were installed.
+        private static bool LeftShiftHeld()
+        {
+            if (Application.platform != RuntimePlatform.WindowsPlayer) return false;
+            try { return (GetAsyncKeyState(VK_LSHIFT) & 0x8000) != 0; }
+            catch (Exception) { return false; }
+        }
+
         public static bool Loaded { get; private set; } = false;
 
         public Unbound()
         {
-            if ((GetAsyncKeyState(VK_LSHIFT) & 0x8000) != 0)
+            if (LeftShiftHeld())
             {
                 Debug.LogWarning("UnboundLib was not loaded due to Left Shift being pressed!");
                 DestroyImmediate(this);
@@ -115,7 +124,8 @@ namespace UnboundLib
                 Credits.Instance.CreateCreditsMenu(firstTime);
                 KickMenu.Init(firstTime);
                 MainMenuLinks.AddLinks(firstTime);
-                RegisterUpdateChecker("UnboundLib", Version, "Bknibb", "UnboundLib");
+                // No check against Bknibb's releases: this build comes with DuctTape, which players update, not
+                // UnboundLib itself. Other mods' update checks still work.
 
                 var time = firstTime;
                 this.ExecuteAfterSeconds(firstTime ? 0.4f : 0, () =>
