@@ -376,6 +376,17 @@ namespace UnboundLib.Utils.UI
                 componentsInChild.firstValueToSet = true;
             }
 
+            // A card turns face up and scales in on game time, which stops while the pause menu is open in a local game
+            // (sandbox): opened from there, the menu's cards stayed turned away. They run on real time instead.
+            foreach (CurveAnimation curveAnimation in cardObject.GetComponentsInChildren<CurveAnimation>(true))
+            {
+                curveAnimation.useTimeScale = false;
+            }
+            foreach (ScaleShake scaleShake in cardObject.GetComponentsInChildren<ScaleShake>(true))
+            {
+                scaleShake.useTimeScale = false;
+            }
+
             FindObjectInChildren(cardObject, "BlockFront")?.SetActive(false);
 
             var canvasGroups = cardObject.GetComponentsInChildren<CanvasGroup>();
