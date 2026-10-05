@@ -1,4 +1,7 @@
-﻿namespace UnboundLib.GameModes
+﻿using System.Collections;
+using UnityEngine;
+
+namespace UnboundLib.GameModes
 {
     public class SandboxHandler : GameModeHandler<GM_Test>
     {
@@ -14,7 +17,25 @@
 
         public override void PlayerJoined(Player player)
         {
+            // The old game's sandbox loaded its first map before letting players join; the 2025 GM_Test lets them join
+            // first (OnEnable). A player added before the map was there threw in PlayerWasAdded (no map to spawn on) and
+            // never spawned; a custom map, which takes longer to load, made that likely. Wait for the map.
+            if (MapManager.instance.currentMap == null || MapManager.instance.currentMap.Map == null)
+            {
+                Unbound.Instance.StartCoroutine(AddWhenMapLoaded(player));
+                return;
+            }
             GameMode.InvokeMethod("PlayerWasAdded", player);
+        }
+
+        private IEnumerator AddWhenMapLoaded(Player player)
+        {
+            var giveUp = Time.realtimeSinceStartup + 30f;
+            while ((MapManager.instance.currentMap == null || MapManager.instance.currentMap.Map == null) && Time.realtimeSinceStartup < giveUp)
+            {
+                yield return null;
+            }
+            if (player != null && GameMode != null) GameMode.InvokeMethod("PlayerWasAdded", player);
         }
 
         public override void PlayerDied(Player killedPlayer, int playersAlive)
