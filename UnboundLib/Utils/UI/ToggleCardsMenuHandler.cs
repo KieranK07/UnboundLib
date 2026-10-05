@@ -359,6 +359,9 @@ namespace UnboundLib.Utils.UI
         {
             GameObject cardObject = Instantiate(cardInfo.gameObject, parent.gameObject.transform);
             cardObject.AddComponent<MenuCard>();
+            // before the return below: cards outside the open category aren't built yet (their Awake waits for the
+            // category to show) and return there
+            cardObject.AddComponent<RealTimeAnimations>();
             cardObject.SetActive(true);
 
             GameObject cardFrontObject = FindObjectInChildren(cardObject, "Front");
@@ -375,8 +378,6 @@ namespace UnboundLib.Utils.UI
             {
                 componentsInChild.firstValueToSet = true;
             }
-
-            cardObject.AddComponent<RealTimeAnimations>();
 
             FindObjectInChildren(cardObject, "BlockFront")?.SetActive(false);
 
